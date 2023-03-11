@@ -1,5 +1,6 @@
 package com.zerobase.account.controller;
 
+import com.zerobase.account.dto.AccountDto;
 import com.zerobase.account.dto.CreateAccount;
 import com.zerobase.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,11 @@ public class AccountController {
     public CreateAccount.Response createAccount(
             @RequestBody @Valid CreateAccount.Request request
     ) {
-        accountService.createAccount(
-                request.getUserId(),
-                request.getInitialBalance()
+        return CreateAccount.Response.from(
+                accountService.createAccount(
+                        request.getUserId(),
+                        request.getInitialBalance()
+                )
         );
     }
 }
