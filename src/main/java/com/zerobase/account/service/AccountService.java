@@ -2,6 +2,7 @@ package com.zerobase.account.service;
 
 import com.zerobase.account.domain.Account;
 import com.zerobase.account.domain.AccountUser;
+import com.zerobase.account.dto.AccountDto;
 import com.zerobase.account.exception.AccountException;
 import com.zerobase.account.repository.AccountRepository;
 import com.zerobase.account.repository.AccountUserRepository;
@@ -25,7 +26,7 @@ public class AccountService {
      * 계좌를 지정하고, 그 정보를 보낸다
      */
     @Transactional
-    public Account createAccount(Long userId, Long initialBalance) {
+    public AccountDto createAccount(Long userId, Long initialBalance) {
         AccountUser accountUser = accountUserRepository.findById(userId)
                 .orElseThrow(() -> new AccountException(ErrorCode.USER_NOT_FOUND));
 
@@ -34,14 +35,14 @@ public class AccountService {
                 .map(account -> (Integer.parseInt(account.getAccountNumber())) + 1 + "")
                 .orElse("1000000000");
 
-        return accountRepository.save(
-                Account.builder()
-                        .accountUser(accountUser)
-                        .accountStatus(AccountStatus.IN_USE)
-                        .accountNumber(newAccountNumber)
-                        .balance(initialBalance)
-                        .registeredAt(LocalDateTime.now())
-                        .build()
+        return AccountDto.fromEntity(
+                accountRepository.save(Account.builder()
+                                .accountUser(accountUser)
+                                .accountStatus(AccountStatus.IN_USE)
+                                .accountNumber(newAccountNumber)
+                                .balance(initialBalance)
+                                .registeredAt(LocalDateTime.now())
+                                .build())
         );
     }
 }
