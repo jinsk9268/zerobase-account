@@ -29,5 +29,13 @@ public class CreateAccount {
         private Long userId;
         private String accountNumber;
         private LocalDateTime registerAt;
+
+        public static Response from(AccountDto accountDto) {
+            return Response.builder()
+                    .userId(accountDto.getUserId())
+                    .accountNumber(accountDto.getAccountNumber())
+                    .registerAt(accountDto.getRegisteredAt())
+                    .build();
+        }
     }
 }
