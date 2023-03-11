@@ -1,5 +1,6 @@
 package com.zerobase.account.dto;
 
+import com.zerobase.account.domain.Account;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,4 +17,12 @@ public class AccountDto {
     private LocalDateTime registeredAt;
     private LocalDateTime unRegisteredAt;
 
+    public static AccountDto fromEntity(Account account) {
+        return AccountDto.builder()
+                .userId(account.getAccountUser().getId())
+                .accountNumber(account.getAccountNumber())
+                .registeredAt(account.getRegisteredAt())
+                .unRegisteredAt(account.getUnRegisteredAt())
+                .build();
+    }
 }
