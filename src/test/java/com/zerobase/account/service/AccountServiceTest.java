@@ -3,8 +3,11 @@ package com.zerobase.account.service;
 import com.zerobase.account.domain.Account;
 import com.zerobase.account.domain.AccountUser;
 import com.zerobase.account.dto.AccountDto;
+import com.zerobase.account.exception.AccountException;
 import com.zerobase.account.repository.AccountRepository;
 import com.zerobase.account.repository.AccountUserRepository;
+import com.zerobase.account.type.ErrorCode;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -79,5 +82,20 @@ class AccountServiceTest {
         verify(accountRepository, times(1)).save(captor.capture());
         assertEquals(15L, accountDto.getUserId());
         assertEquals("1000000000", captor.getValue().getAccountNumber());
+    }
+
+    @Test
+    @DisplayName("해당 유저 없음 - 계좌 생성 실패")
+    void createAccount_UserNotFound() {
+        // given
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> accountService.createAccount(1L, 1000L));
+
+        // then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 }
