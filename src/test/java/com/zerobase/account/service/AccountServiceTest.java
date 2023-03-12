@@ -143,4 +143,19 @@ class AccountServiceTest {
         assertEquals("1000000012", captor.getValue().getAccountNumber());
         assertEquals(AccountStatus.UNREGISTERED, captor.getValue().getAccountStatus());
     }
+
+    @Test
+    @DisplayName("해당 유저 없음 - 계좌 해지 실패")
+    void deleteAccount_UserNotFound() {
+        // given
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> accountService.deleteAccount(1L, "1234567890"));
+
+        // then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
 }
