@@ -177,4 +177,28 @@ class AccountServiceTest {
         // then
         assertEquals(ErrorCode.ACCOUNT_NOT_FOUND, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("계좌 소유주 다름")
+    void deleteAccountFailed_userAnMatch() {
+        // given
+        AccountUser userJin = AccountUser.builder()
+                .id(12L).name("jin").build();
+        AccountUser userJoy = AccountUser.builder()
+                .id(13L).name("joy").build();
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.of(userJin));
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(Account.builder()
+                        .accountUser(userJoy)
+                        .balance(0L)
+                        .accountNumber("1000000012").build()));
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> accountService.deleteAccount(1L, "1234567890"));
+
+        // then
+        assertEquals(ErrorCode.USER_ACCOUNT_UN_MATCH, exception.getErrorCode());
+    }
 }
