@@ -201,4 +201,26 @@ class AccountServiceTest {
         // then
         assertEquals(ErrorCode.USER_ACCOUNT_UN_MATCH, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("잔액이 있는 계좌 해지")
+    void deleteAccountFailed_balanceNotEmpty() {
+        // given
+        AccountUser userJin = AccountUser.builder()
+                .id(12L).name("jin").build();
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.of(userJin));
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(Account.builder()
+                        .accountUser(userJin)
+                        .balance(100L)
+                        .accountNumber("1000000012").build()));
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> accountService.deleteAccount(1L, "1234567890"));
+
+        // then
+        assertEquals(ErrorCode.BALANCE_NOT_EMPTY, exception.getErrorCode());
+    }
 }
