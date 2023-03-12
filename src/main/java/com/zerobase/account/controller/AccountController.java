@@ -1,15 +1,15 @@
 package com.zerobase.account.controller;
 
+import com.zerobase.account.dto.AccountInfo;
 import com.zerobase.account.dto.CreateAccount;
 import com.zerobase.account.dto.DeleteAccount;
 import com.zerobase.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,5 +38,18 @@ public class AccountController {
                         request.getAccountNumber()
                 )
         );
+    }
+
+    @GetMapping("/account")
+    public List<AccountInfo> getAccountByUserId(
+            @RequestParam("user_id") Long userId
+    ) {
+        return accountService.getAccountsByUserId(userId)
+                .stream().map(accountDto ->
+                        AccountInfo.builder()
+                                .accountNumber(accountDto.getAccountNumber())
+                                .balance(accountDto.getBalance())
+                                .build())
+                .collect(Collectors.toList());
     }
 }
