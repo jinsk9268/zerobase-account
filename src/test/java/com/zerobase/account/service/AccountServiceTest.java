@@ -290,4 +290,18 @@ class AccountServiceTest {
         assertEquals("3234567890", accountDtos.get(2).getAccountNumber());
         assertEquals(3000, accountDtos.get(2).getBalance());
     }
+
+    @Test
+    void failedToGetAccounts() {
+        // given
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> accountService.getAccountsByUserId(1L));
+
+        // then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
 }
