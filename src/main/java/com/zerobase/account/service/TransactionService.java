@@ -43,7 +43,7 @@ public class TransactionService {
         return TransactionDto.fromEntity(transactionRepository.save(
                 Transaction.builder()
                         .transactionType(TransactionType.USE)
-                        .transactionResultType(TransactionResultType.S)
+                        .transactionResultType(TransactionResultType.F)
                         .account(account)
                         .amount(amount)
                         .balanceSnapshot(account.getBalance())
@@ -71,5 +71,23 @@ public class TransactionService {
         if (account.getBalance() < amount) {
             throw new AccountException(ErrorCode.AMOUNT_EXCEED_BALANCE);
         }
+    }
+
+    @Transactional
+    public void saveFailedUseTransaction(String accountNumber, Long amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        transactionRepository.save(
+                Transaction.builder()
+                        .transactionType(TransactionType.USE)
+                        .transactionResultType(TransactionResultType.S)
+                        .account(account)
+                        .amount(amount)
+                        .balanceSnapshot(account.getBalance())
+                        .transactionId(UUID.randomUUID().toString().replace("-", ""))
+                        .transactedAt(LocalDateTime.now())
+                        .build()
+        );
     }
 }
