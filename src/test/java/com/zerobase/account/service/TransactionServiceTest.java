@@ -193,4 +193,40 @@ class TransactionServiceTest {
         assertEquals(ErrorCode.AMOUNT_EXCEED_BALANCE, exception.getErrorCode());
         verify(transactionRepository, times(0)).save(any());
     }
+
+    @Test
+    @DisplayName("실패 트랜잭션 저장 성공")
+    void saveFailedUseTransaction() {
+        // given
+        AccountUser user = AccountUser.builder()
+                .id(12L).name("jin").build();
+        Account account = Account.builder()
+                .accountUser(user)
+                .accountStatus(AccountStatus.IN_USE)
+                .balance(10000L)
+                .accountNumber("1234567890")
+                .build();
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(account));
+        given(transactionRepository.save(any()))
+                .willReturn(Transaction.builder()
+                        .account(account)
+                        .transactionType(TransactionType.USE)
+                        .transactionResultType(TransactionResultType.S)
+                        .transactionId("transactionId")
+                        .transactedAt(LocalDateTime.now())
+                        .amount(1000L)
+                        .balanceSnapshot(9000L)
+                        .build());
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+
+        // when
+        transactionService.saveFailedUseTransaction("01234567890", USE_AMOUNT);
+
+        // then
+        verify(transactionRepository, times(1)).save(captor.capture());
+        assertEquals(USE_AMOUNT, captor.getValue().getAmount());
+        assertEquals(10000L, captor.getValue().getBalanceSnapshot());
+        assertEquals(TransactionResultType.F, captor.getValue().getTransactionResultType());
+    }
 }
