@@ -2,6 +2,7 @@ package com.zerobase.account.service;
 
 import com.zerobase.account.domain.Account;
 import com.zerobase.account.domain.AccountUser;
+import com.zerobase.account.domain.Transaction;
 import com.zerobase.account.dto.TransactionDto;
 import com.zerobase.account.exception.AccountException;
 import com.zerobase.account.repository.AccountRepository;
@@ -9,17 +10,20 @@ import com.zerobase.account.repository.AccountUserRepository;
 import com.zerobase.account.repository.TransactionRepository;
 import com.zerobase.account.type.AccountStatus;
 import com.zerobase.account.type.ErrorCode;
+import com.zerobase.account.type.TransactionResultType;
+import com.zerobase.account.type.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountUserRepository accountUserRepository;
@@ -33,6 +37,20 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         validateUseBalance(user, account, amount);
+
+        account.useBalance(amount);
+
+        return TransactionDto.fromEntity(transactionRepository.save(
+                Transaction.builder()
+                        .transactionType(TransactionType.USE)
+                        .transactionResultType(TransactionResultType.S)
+                        .account(account)
+                        .amount(amount)
+                        .balanceSnapshot(account.getBalance())
+                        .transactionId(UUID.randomUUID().toString().replace("-", ""))
+                        .transactedAt(LocalDateTime.now())
+                        .build()
+        ));
     }
 
     /**
