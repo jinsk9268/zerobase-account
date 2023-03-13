@@ -101,6 +101,14 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         validateCancelBalance(transaction, account, amount);
+
+        account.cancelBalance(amount);
+
+        return TransactionDto.fromEntity(
+                saveAndGetTransaction(
+                        TransactionType.CANCEL, TransactionResultType.S, amount, account
+                )
+        );
     }
 
     private void validateCancelBalance(
