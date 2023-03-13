@@ -132,4 +132,12 @@ public class TransactionService {
             throw new AccountException(ErrorCode.TOO_OLD_ORDER_TO_CANCEL);
         }
     }
+
+    @Transactional
+    public void saveFailedCancelTransaction(String accountNumber, Long amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        saveAndGetTransaction(TransactionType.CANCEL, TransactionResultType.F, amount, account);
+    }
 }
