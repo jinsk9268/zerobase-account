@@ -33,6 +33,11 @@ public class LockService {
         }
     }
 
+    public void unlock(String accountNumber) {
+        log.debug("Unlock for accountNumber : {} ", accountNumber);
+        redissonClient.getLock(getLockKey(accountNumber)).unlock();
+    }
+
     private String getLockKey(String accountNumber) {
         return "ACLK: " + accountNumber;
     }
