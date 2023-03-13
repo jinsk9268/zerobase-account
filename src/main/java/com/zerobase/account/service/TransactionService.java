@@ -41,7 +41,9 @@ public class TransactionService {
         account.useBalance(amount);
 
         return TransactionDto.fromEntity(
-                saveAndGetTransaction(TransactionResultType.S, amount, account)
+                saveAndGetTransaction(
+                        TransactionType.USE, TransactionResultType.S, amount, account
+                )
         );
     }
 
@@ -70,15 +72,15 @@ public class TransactionService {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-        saveAndGetTransaction(TransactionResultType.F, amount, account);
+        saveAndGetTransaction(TransactionType.USE, TransactionResultType.F, amount, account);
     }
 
     private Transaction saveAndGetTransaction(
-            TransactionResultType transactionResultType, Long amount, Account account
+            TransactionType transactionType, TransactionResultType transactionResultType, Long amount, Account account
     ) {
         return transactionRepository.save(
                 Transaction.builder()
-                        .transactionType(TransactionType.USE)
+                        .transactionType(transactionType)
                         .transactionResultType(transactionResultType)
                         .account(account)
                         .amount(amount)
