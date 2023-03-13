@@ -29,6 +29,12 @@ public class TransactionService {
     private final AccountUserRepository accountUserRepository;
     private final AccountRepository accountRepository;
 
+    /**
+     * 잔액 사용 API 정책
+     * 사용자 없는 경우, 계좌가 없는 경우, 사용자 아이디와 계좌 소유주가 다른 경우,
+     * 계좌가 이미 해지 상태인 경우, 거래금액이 잔액보다 큰 경우,
+     * 거래금액이 너무 작거나 큰 경우 실패 응답 (-> Request Body의 validate으로 진행)
+     */
     @Transactional
     public TransactionDto useBalance(Long userId, String accountNumber, Long amount) {
         AccountUser user = accountUserRepository.findById(userId)
@@ -47,12 +53,6 @@ public class TransactionService {
         );
     }
 
-    /**
-     * 잔액 사용 API 정책
-     * 사용자 없는 경우, 계좌가 없는 경우, 사용자 아이디와 계좌 소유주가 다른 경우,
-     * 계좌가 이미 해지 상태인 경우, 거래금액이 잔액보다 큰 경우,
-     * 거래금액이 너무 작거나 큰 경우 실패 응답 (-> Request Body의 validate으로 진행)
-     */
     private void validateUseBalance(AccountUser user, Account account, Long amount) {
         if (!Objects.equals(user.getId(), account.getAccountUser().getId())) {
             throw new AccountException(ErrorCode.USER_ACCOUNT_UN_MATCH);
@@ -91,6 +91,12 @@ public class TransactionService {
         );
     }
 
+    /**
+     * 잔액 사용 취소 API 정책
+     * 거래 아이디에 해당하는 거래가 없는 경우, 계좌가 없는 경우, 거래와 계좌가 일치하지 않는 경우,
+     * 거래 금액과 취소 금액이 다른 경우 (부분 취소 불가능)
+     * 1년이 넘은 거래를 취소하려고 할 경우
+     */
     @Transactional
     public TransactionDto cancelBalance(
             String transactionId, String accountNumber, Long amount
