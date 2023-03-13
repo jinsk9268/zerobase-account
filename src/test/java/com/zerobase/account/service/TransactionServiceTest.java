@@ -102,4 +102,23 @@ class TransactionServiceTest {
         // then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("해당 계좌 없음 - 잔액 사용 실패")
+    void useBalance_AccountNotFound() {
+        // given
+        AccountUser user = AccountUser.builder()
+                .id(12L).name("jin").build();
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.of(user));
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.empty());
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> transactionService.useBalance(1L, "1234567890", 1000L));
+
+        // then
+        assertEquals(ErrorCode.ACCOUNT_NOT_FOUND, exception.getErrorCode());
+    }
 }
