@@ -4,12 +4,15 @@ import com.zerobase.account.domain.Account;
 import com.zerobase.account.domain.AccountUser;
 import com.zerobase.account.domain.Transaction;
 import com.zerobase.account.dto.TransactionDto;
+import com.zerobase.account.exception.AccountException;
 import com.zerobase.account.repository.AccountRepository;
 import com.zerobase.account.repository.AccountUserRepository;
 import com.zerobase.account.repository.TransactionRepository;
 import com.zerobase.account.type.AccountStatus;
+import com.zerobase.account.type.ErrorCode;
 import com.zerobase.account.type.TransactionResultType;
 import com.zerobase.account.type.TransactionType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -83,5 +86,20 @@ class TransactionServiceTest {
         assertEquals(TransactionType.USE, transactionDto.getTransactionType());
         assertEquals(9000L, transactionDto.getBalanceSnapshot());
         assertEquals(1000L, transactionDto.getAmount());
+    }
+
+    @Test
+    @DisplayName("해당 유저 없음 - 잔액 사용 실패")
+    void useBalance_UserNotFound() {
+        // given
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> transactionService.useBalance(1L, "1234567890", 1000L));
+
+        // then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 }
