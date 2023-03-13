@@ -102,6 +102,7 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Account getAccount(Long id) {
         if (id < 0) {
             throw new RuntimeException("Minus");

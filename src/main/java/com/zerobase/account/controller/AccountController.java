@@ -1,5 +1,6 @@
 package com.zerobase.account.controller;
 
+import com.zerobase.account.domain.Account;
 import com.zerobase.account.dto.AccountInfo;
 import com.zerobase.account.dto.CreateAccount;
 import com.zerobase.account.dto.DeleteAccount;
@@ -51,5 +52,11 @@ public class AccountController {
                                 .balance(accountDto.getBalance())
                                 .build())
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/account/{id}")
+    public Account getAccount(
+            @PathVariable Long id) {
+        return accountService.getAccount(id);
     }
 }
