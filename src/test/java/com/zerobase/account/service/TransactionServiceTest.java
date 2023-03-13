@@ -168,4 +168,29 @@ class TransactionServiceTest {
         // then
         assertEquals(ErrorCode.ACCOUNT_ALREADY_UNREGISTERED, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("거래 금액이 잔액보다 큰 경우")
+    void useBalanceFailed_ExceedAmount() {
+        // given
+        AccountUser user = AccountUser.builder()
+                .id(12L).name("jin").build();
+        Account account = Account.builder()
+                .accountUser(user)
+                .accountStatus(AccountStatus.IN_USE)
+                .balance(100L)
+                .accountNumber("1234567890")
+                .build();
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.of(user));
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(account));
+
+        // when
+        // then
+        AccountException exception = assertThrows(AccountException.class,
+                () -> transactionService.useBalance(1L, "1234567890", USE_AMOUNT));
+        assertEquals(ErrorCode.AMOUNT_EXCEED_BALANCE, exception.getErrorCode());
+        verify(transactionRepository, times(0)).save(any());
+    }
 }
