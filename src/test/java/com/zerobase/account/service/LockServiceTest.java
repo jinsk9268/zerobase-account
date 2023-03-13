@@ -1,5 +1,7 @@
 package com.zerobase.account.service;
 
+import com.zerobase.account.exception.AccountException;
+import com.zerobase.account.type.ErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,4 +38,19 @@ class LockServiceTest {
         assertDoesNotThrow(() -> lockService.lock("123"));
     }
 
+    @Test
+    void failGetLock() throws InterruptedException {
+        // given
+        given(redissonClient.getLock(anyString()))
+                .willReturn(rLock);
+        given(rLock.tryLock(anyLong(), anyLong(), any()))
+                .willReturn(false);
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> lockService.lock("123"));
+
+        // then
+        assertEquals(ErrorCode.ACCOUNT_TRANSACTION_LOCK, exception.getErrorCode());
+    }
 }
