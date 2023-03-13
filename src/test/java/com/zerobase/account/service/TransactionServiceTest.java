@@ -12,6 +12,7 @@ import com.zerobase.account.type.TransactionResultType;
 import com.zerobase.account.type.TransactionType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,10 +23,14 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
+    public static final long USE_AMOUNT = 200L;
+
     @Mock
     private TransactionRepository transactionRepository;
 
@@ -63,13 +68,17 @@ class TransactionServiceTest {
                         .amount(1000L)
                         .balanceSnapshot(9000L)
                         .build());
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
 
         // when
         TransactionDto transactionDto = transactionService.useBalance(
-                1L, "01234567890", 1000L
+                1L, "01234567890", USE_AMOUNT
         );
 
         // then
+        verify(transactionRepository, times(1)).save(captor.capture());
+        assertEquals(USE_AMOUNT, captor.getValue().getAmount());
+        assertEquals(9800L, captor.getValue().getBalanceSnapshot());
         assertEquals(TransactionResultType.S, transactionDto.getTransactionResultType());
         assertEquals(TransactionType.USE, transactionDto.getTransactionType());
         assertEquals(9000L, transactionDto.getBalanceSnapshot());
