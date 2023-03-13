@@ -3,7 +3,9 @@ package com.zerobase.account.controller;
 import com.zerobase.account.dto.AccountInfo;
 import com.zerobase.account.dto.CreateAccount;
 import com.zerobase.account.dto.DeleteAccount;
+import com.zerobase.account.dto.QueryTransactionResponse;
 import com.zerobase.account.service.AccountService;
+import com.zerobase.account.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountService accountService;
+    private final TransactionService transactionService;
 
     @PostMapping("/account")
     public CreateAccount.Response createAccount(
@@ -51,5 +54,14 @@ public class AccountController {
                                 .balance(accountDto.getBalance())
                                 .build())
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/transaction/{transactionId}")
+    public QueryTransactionResponse queryTransaction(
+            @PathVariable String transactionId
+    ) {
+        return QueryTransactionResponse.from(
+                transactionService.queryTransaction(transactionId)
+        );
     }
 }
