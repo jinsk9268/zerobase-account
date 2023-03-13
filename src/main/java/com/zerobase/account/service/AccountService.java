@@ -101,4 +101,11 @@ public class AccountService {
                 .map(AccountDto::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    public Account getAccount(Long id) {
+        if (id < 0) {
+            throw new RuntimeException("Minus");
+        }
+        return accountRepository.findById(id).get();
+    }
 }
