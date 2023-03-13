@@ -46,7 +46,7 @@ public class UseBalance {
     @Builder
     public static class Response {
         private String accountNumber;
-        private TransactionResultType transactionResult;
+        private TransactionResultType transactionResultType;
         private String transactionId;
         private Long amount;
         private LocalDateTime transactedAt;
