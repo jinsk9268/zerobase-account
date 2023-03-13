@@ -358,4 +358,40 @@ class TransactionServiceTest {
         // then
         assertEquals(ErrorCode.TRANSACTION_ACCOUNT_UN_MATCH, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("거래금액과 취소금액이 다름 - 잔액 사용 취소 실패")
+    void cancelTransaction_CancelMustFully() {
+        // given
+        AccountUser user = AccountUser.builder()
+                .id(12L).name("jin").build();
+        Account account = Account.builder()
+                .accountUser(user)
+                .accountStatus(AccountStatus.IN_USE)
+                .balance(10000L)
+                .accountNumber("1234567890")
+                .build();
+        Transaction transaction = Transaction.builder()
+                .id(2L)
+                .account(account)
+                .transactionType(TransactionType.USE)
+                .transactionResultType(TransactionResultType.S)
+                .transactionId("transactionId")
+                .transactedAt(LocalDateTime.now())
+                .amount(CANCEL_AMOUNT + 1000L)
+                .balanceSnapshot(9000L)
+                .build();
+        given(transactionRepository.findByTransactionId(anyString()))
+                .willReturn(Optional.of(transaction));
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(account));
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> transactionService.cancelBalance(
+                        "transactionId", "1234567890", CANCEL_AMOUNT));
+
+        // then
+        assertEquals(ErrorCode.CANCEL_MUST_FULLY, exception.getErrorCode());
+    }
 }
