@@ -299,4 +299,20 @@ class TransactionServiceTest {
         // then
         assertEquals(ErrorCode.ACCOUNT_NOT_FOUND, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("원 사용 거래 없음 - 잔액 사용 취소 실패")
+    void cancelTransaction_TransactionNotFound() {
+        // given
+        given(transactionRepository.findByTransactionId(anyString()))
+                .willReturn(Optional.empty());
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> transactionService.cancelBalance(
+                        "transactionId", "1234567890", 1000L));
+
+        // then
+        assertEquals(ErrorCode.TRANSACTION_NOT_FOUND, exception.getErrorCode());
+    }
 }
