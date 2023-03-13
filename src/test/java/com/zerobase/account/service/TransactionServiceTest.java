@@ -145,4 +145,27 @@ class TransactionServiceTest {
         // then
         assertEquals(ErrorCode.USER_ACCOUNT_UN_MATCH, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("이미 해지한 계좌는 사용할 수 없다")
+    void useBalanceFailed_AlreadyUnRegistered() {
+        // given
+        AccountUser userJin = AccountUser.builder()
+                .id(12L).name("jin").build();
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.of(userJin));
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(Account.builder()
+                        .accountUser(userJin)
+                        .accountStatus(AccountStatus.UNREGISTERED)
+                        .balance(0L)
+                        .accountNumber("1000000012").build()));
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> transactionService.useBalance(1L, "1234567890", 1000L));
+
+        // then
+        assertEquals(ErrorCode.ACCOUNT_ALREADY_UNREGISTERED, exception.getErrorCode());
+    }
 }
